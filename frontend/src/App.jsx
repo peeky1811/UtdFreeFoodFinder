@@ -1,5 +1,4 @@
-import { Routes, Route, Link } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { Routes, Route } from 'react-router-dom';
 import Feed from './pages/Feed';
 import PostFood from './pages/PostFood';
 import './App.css';
@@ -17,11 +16,6 @@ function App() {
           <Route path="/post" element={<PostFood />} />
         </Routes>
       </main>
-
-      {/* Mobile Sticky FAB - Only visible on mobile endpoints */}
-      <Link to="/post" className="mobile-only-fab">
-        <Plus size={32} />
-      </Link>
     </div>
   );
 }
