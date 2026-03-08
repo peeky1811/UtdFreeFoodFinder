@@ -43,8 +43,8 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background: linear-gradient(rgba(10, 10, 14, 0.85), rgba(10, 10, 14, 0.85)), 
-              url('C:/Users/gopik/.gemini/antigravity/brain/1f4a5ced-43e3-4763-a3c1-9a99d7022842/food_background_pattern_1772976917072.png');
+  background: linear-gradient(rgba(5, 5, 8, 0.93), rgba(5, 5, 8, 0.93)), 
+              url('file:///C:/Users/gopik/.gemini/antigravity/brain/1f4a5ced-43e3-4763-a3c1-9a99d7022842/food_background_pattern_1772976917072.png');
   background-size: cover;
   background-attachment: fixed;
   background-position: center;
