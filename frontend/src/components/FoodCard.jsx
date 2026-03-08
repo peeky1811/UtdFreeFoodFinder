@@ -500,6 +500,15 @@ export default function FoodCard({ post, onVote, onComment, onEdit, onDelete, lo
           outline: none;
           border-color: var(--utd-orange);
         }
+        select.comment-input option {
+          background-color: #1a1a2e;
+          color: white;
+        }
+        select.comment-input optgroup {
+          background-color: #1a1a2e;
+          color: var(--utd-orange);
+          font-weight: bold;
+        }
         .comment-submit {
           background: rgba(232, 117, 0, 0.2);
           color: var(--utd-orange);
