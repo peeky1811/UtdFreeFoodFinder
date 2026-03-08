@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import FoodCard from '../components/FoodCard';
 import { subscribeToFoodPosts, votePost, addComment, deleteFoodPost, editFoodPost } from '../services/db';
 import { getLocations } from '../services/nebulaApi';
+import { Search, Plus } from 'lucide-react';
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
@@ -12,7 +14,7 @@ export default function Feed() {
     // Fetch locations to pass to cards for editing
     getLocations().then(setLocations).catch(console.error);
 
-    // Subscribe to real-time cross-tab updates from the mock DB
+    // Subscribe to real-time updates from the backend
     const unsubscribe = subscribeToFoodPosts((data) => {
       setPosts(data);
       setLoading(false);
@@ -24,7 +26,6 @@ export default function Feed() {
   }, []);
 
   const handleVote = async (id, val) => {
-    // Real call - UI will instantly update via the pub/sub listener
     await votePost(id, val);
   };
 
@@ -56,10 +57,20 @@ export default function Feed() {
 
   return (
     <div className="feed-container animate-fade-in">
-      <div className="feed-header">
-        <h1 className="text-3xl font-bold mb-2">Live Campus Feed</h1>
-        <p className="text-secondary">Discover what's available for free at UTD right now.</p>
+      <div className="nebula-branding">powered by nebula api</div>
+      
+      <div className="feed-header-alt">
+        <div className="title-row">
+          <h1 className="feed-title-alt">UTD Food Finder</h1>
+          <Search className="search-icon-header" size={28} />
+        </div>
+        <p className="feed-subtitle-alt">Find free food at UT Dallas</p>
       </div>
+
+      <Link to="/post" className="floating-action-button">
+        <Plus size={24} />
+        <span className="fab-text">Post Food</span>
+      </Link>
 
       {posts.length === 0 ? (
         <div className="empty-state glass-panel">
@@ -86,11 +97,40 @@ export default function Feed() {
         .feed-container {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 40px 20px;
+          padding: 60px 20px;
+          position: relative;
         }
-        .feed-header {
-          margin-bottom: 40px;
-          text-align: center;
+        .nebula-branding {
+          font-size: 0.75rem;
+          color: rgba(255,255,255,0.4);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-bottom: 8px;
+          text-align: left;
+        }
+        .feed-header-alt {
+          margin-bottom: 50px;
+          text-align: left;
+        }
+        .title-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 8px;
+        }
+        .feed-title-alt {
+          font-size: 2.8rem;
+          font-weight: 800;
+          color: white;
+          margin: 0;
+        }
+        .search-icon-header {
+          color: var(--utd-orange);
+        }
+        .feed-subtitle-alt {
+          font-size: 1.2rem;
+          color: var(--text-secondary);
+          margin: 0;
         }
         .grid-layout {
           display: grid;
@@ -103,10 +143,52 @@ export default function Feed() {
           max-width: 500px;
           margin: 0 auto;
         }
-        .empty-state h3 {
-          font-size: 1.5rem;
-          margin-bottom: 10px;
-          color: #FFA033;
+        
+        /* Floating Action Button */
+        .floating-action-button {
+          position: fixed;
+          bottom: 30px;
+          right: 30px;
+          background: var(--utd-orange);
+          color: white;
+          padding: 16px 24px;
+          border-radius: 50px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          box-shadow: 0 10px 30px rgba(232, 117, 0, 0.4);
+          text-decoration: none;
+          font-weight: 700;
+          z-index: 1000;
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .floating-action-button:hover {
+          transform: scale(1.05) translateY(-5px);
+          box-shadow: 0 15px 40px rgba(232, 117, 0, 0.6);
+        }
+
+        .floating-action-button:active {
+          transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+          .floating-action-button {
+            width: 60px;
+            height: 60px;
+            padding: 0;
+            justify-content: center;
+            border-radius: 50%;
+            bottom: 20px;
+            right: 20px;
+          }
+          .fab-text {
+            display: none;
+          }
+          .feed-title-alt {
+            font-size: 2rem;
+          }
         }
       `}</style>
     </div>
