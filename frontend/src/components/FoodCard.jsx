@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Clock, MapPin, Info, Edit2, Trash2 } from 'lucide-react';
 import { formatDistanceToNow, isPast } from 'date-fns';
+import SearchableLocationSelect from './SearchableLocationSelect';
 
 export default function FoodCard({ post, onVote, onComment, onEdit, onDelete, locations = [] }) {
   const [timeLeft, setTimeLeft] = useState('');
@@ -102,30 +103,12 @@ export default function FoodCard({ post, onVote, onComment, onEdit, onDelete, lo
             </div>
             <div className="form-group-mini">
               <label className="text-xs font-bold text-secondary">Location</label>
-              <select 
+              <SearchableLocationSelect 
+                locations={locations} 
                 value={editLocation} 
-                onChange={e => setEditLocation(e.target.value)}
-                className="comment-input bg-glass text-sm"
-              >
-                {locations.length > 0 ? locations.map(loc => {
-                  const baseJson = JSON.stringify({ name: loc.name, lat: loc.lat, lng: loc.lng });
-                  return (
-                    <optgroup key={loc.name} label={loc.name}>
-                      <option value={baseJson}>Anywhere in {loc.name}</option>
-                      {loc.rooms && loc.rooms.map(roomNum => {
-                        const roomJson = JSON.stringify({ 
-                          name: `${loc.name} - Room ${roomNum}`, 
-                          lat: loc.lat, 
-                          lng: loc.lng 
-                        });
-                        return <option key={roomNum} value={roomJson}>Room {roomNum}</option>
-                      })}
-                    </optgroup>
-                  );
-                }) : (
-                  <option value={JSON.stringify(post.location)}>{locationName}</option>
-                )}
-              </select>
+                onChange={e => setEditLocation(e.target.value)} 
+                placeholder="Search Building or Room..."
+              />
             </div>
             <div className="edit-actions">
               <button type="submit" className="comment-submit">Save Changes</button>

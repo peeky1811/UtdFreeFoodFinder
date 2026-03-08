@@ -4,6 +4,7 @@ import { getLocations } from '../services/nebulaApi';
 import { addFoodPost } from '../services/db';
 import { Upload, MapPin, Clock, Tag, Camera, X } from 'lucide-react';
 import Webcam from 'react-webcam';
+import SearchableLocationSelect from '../components/SearchableLocationSelect';
 
 export default function PostFood() {
   const navigate = useNavigate();
@@ -188,37 +189,12 @@ export default function PostFood() {
                 <MapPin size={12}/> {locating ? 'Locating...' : 'Locate Me'}
               </button>
             </div>
-            <select 
-              name="location" 
+            <SearchableLocationSelect 
+              locations={locations} 
               value={formData.location} 
-              onChange={handleChange}
-              className="glass-input"
-              required
-            >
-              <option value="" disabled>Select Building / Room</option>
-              {locations.map(loc => {
-                const baseJson = JSON.stringify({ name: loc.name, lat: loc.lat, lng: loc.lng });
-                return (
-                  <optgroup key={loc.name} label={loc.name}>
-                    <option value={baseJson} className="dark-option">
-                      Anywhere in {loc.name}
-                    </option>
-                    {loc.rooms && loc.rooms.map(roomNum => {
-                      const roomJson = JSON.stringify({ 
-                        name: `${loc.name} - Room ${roomNum}`, 
-                        lat: loc.lat, 
-                        lng: loc.lng 
-                      });
-                      return (
-                        <option key={roomNum} value={roomJson} className="dark-option">
-                          Room {roomNum}
-                        </option>
-                      );
-                    })}
-                  </optgroup>
-                );
-              })}
-            </select>
+              onChange={handleChange} 
+              placeholder="Search Building or Room..."
+            />
           </div>
           
           <div className="form-group">
