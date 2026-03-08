@@ -180,8 +180,9 @@ export default function Feed() {
             padding: 0;
             justify-content: center;
             border-radius: 50%;
-            bottom: 20px;
-            right: 20px;
+            bottom: calc(20px + env(safe-area-inset-bottom));
+            right: calc(20px + env(safe-area-inset-right));
+            box-shadow: 0 8px 25px rgba(232, 117, 0, 0.5);
           }
           .fab-text {
             display: none;
