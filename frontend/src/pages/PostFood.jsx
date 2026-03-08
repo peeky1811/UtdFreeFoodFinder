@@ -64,9 +64,17 @@ export default function PostFood() {
     return () => stopCamera();
   }, []);
 
-  // Haversine formula to calculate distance between two lat/lng coordinates
+  const [nearby, setNearby] = useState(false);
+  const [locationAvailable] = useState(() => {
+    return typeof window !== 'undefined' && 'geolocation' in navigator;
+  });
+  const [locationGranted, setLocationGranted] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [userCoords, setUserCoords] = useState(null);
+
+  // Haversine formula
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // Earth's radius in km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = 
@@ -77,50 +85,68 @@ export default function PostFood() {
     return R * c;
   };
 
-  const handleLocateMe = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+  const sortLocations = useCallback((locs, coords) => {
+    if (!coords) return locs;
+    return [...locs].sort((a, b) => {
+      const distA = calculateDistance(coords.lat, coords.lng, a.lat, a.lng);
+      const distB = calculateDistance(coords.lat, coords.lng, b.lat, b.lng);
+      return distA - distB;
+    });
+  }, []);
+
+  const handleNearbyToggle = (checked) => {
+    if (locationLoading) {
+      setLocationLoading(false);
       return;
     }
-    
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const userLat = position.coords.latitude;
-        const userLng = position.coords.longitude;
-        
-        // Find closest building
-        let closestBuilding = null;
-        let minDistance = Infinity;
-        
-        locations.forEach(loc => {
-          if (loc.lat && loc.lng) {
-            const dist = calculateDistance(userLat, userLng, loc.lat, loc.lng);
-            if (dist < minDistance) {
-              minDistance = dist;
-              closestBuilding = loc;
-            }
+
+    if (!checked || locationGranted) {
+      setNearby(checked);
+    } else {
+      // Check permissions
+      if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+          if (result.state === 'granted') {
+            setLocationGranted(true);
+            setNearby(true);
+            fetchUserLocation();
+          } else if (result.state === 'prompt' || result.state === 'denied') {
+            // we'll try to get it anyway to trigger prompt
+            fetchUserLocation();
           }
         });
+      } else {
+        fetchUserLocation();
+      }
+    }
+  };
 
-        if (closestBuilding) {
-          setSelectedBuilding(closestBuilding);
-          setFormData(prev => ({ 
-            ...prev, 
-            location: JSON.stringify(closestBuilding),
-            specificRoom: '' // reset room when building changes
+  const fetchUserLocation = () => {
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+        setUserCoords(coords);
+        setLocationGranted(true);
+        setLocationLoading(false);
+        setNearby(true);
+        
+        // Auto-select closest
+        const sorted = sortLocations(locations, coords);
+        if (sorted.length > 0) {
+          const closest = sorted[0];
+          setFormData(prev => ({
+            ...prev,
+            location: JSON.stringify({ name: closest.name, lat: closest.lat, lng: closest.lng })
           }));
-        } else {
-          alert("Could not determine closest building. Please select manually.");
         }
-        setLocating(false);
       },
       (error) => {
-        console.error("Error getting location", error);
-        alert("Unable to retrieve your location. Check browser permissions.");
-        setLocating(false);
+        console.error("Location error", error);
+        setLocationLoading(false);
+        alert("Could not get your location. Please select manually.");
       },
-      { enableHighAccuracy: true } // Prefer GPS
+      { enableHighAccuracy: true, maximumAge: 60000 }
     );
   };
 
@@ -179,18 +205,23 @@ export default function PostFood() {
           <div className="form-group">
             <div className="label-with-action">
               <label><MapPin size={16}/> Where is it?</label>
-              <button 
-                type="button" 
-                onClick={handleLocateMe} 
-                className="btn-locate-me"
-                disabled={locating || locations.length === 0}
-                title="Find nearest building using GPS"
-              >
-                <MapPin size={12}/> {locating ? 'Locating...' : 'Locate Me'}
-              </button>
+              {locationAvailable && (
+                <div className="nearby-control">
+                  {locationLoading && <div className="spinner-loader"></div>}
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={nearby}
+                      onChange={(e) => handleNearbyToggle(e.target.checked)}
+                      className="glass-checkbox"
+                    />
+                    <span>Nearby buildings</span>
+                  </label>
+                </div>
+              )}
             </div>
             <SearchableLocationSelect 
-              locations={locations} 
+              locations={sortLocations(locations, nearby ? userCoords : null)} 
               value={formData.location} 
               onChange={handleChange} 
               placeholder="Search Building or Room..."
@@ -307,27 +338,37 @@ export default function PostFood() {
           justify-content: space-between;
           align-items: center;
         }
-        .btn-locate-me {
-          background: rgba(232, 117, 0, 0.15);
-          border: 1px solid var(--utd-orange);
-          color: var(--utd-orange);
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: bold;
-          cursor: pointer;
+        .nearby-control {
           display: flex;
           align-items: center;
-          gap: 4px;
-          transition: all 0.2s;
+          gap: 12px;
         }
-        .btn-locate-me:hover:not(:disabled) {
-          background: var(--utd-orange);
-          color: white;
+        .checkbox-label {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+          cursor: pointer;
+          user-select: none;
         }
-        .btn-locate-me:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
+        .glass-checkbox {
+          accent-color: var(--utd-orange);
+          width: 16px;
+          height: 16px;
+          cursor: pointer;
+        }
+        .spinner-loader {
+          width: 16px;
+          height: 16px;
+          border: 2px solid rgba(255,255,255,0.1);
+          border-top: 2px solid var(--utd-orange);
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
         .glass-input {
           background: rgba(0,0,0,0.2);

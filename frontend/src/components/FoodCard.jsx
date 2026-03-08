@@ -13,13 +13,90 @@ export default function FoodCard({ post, onVote, onComment, onEdit, onDelete, lo
   const [editLocation, setEditLocation] = useState(JSON.stringify(post.location));
   const [myVote, setMyVote] = useState(null);
 
-  // Sync edit states when exiting/entering edit mode or when post data changes
   useEffect(() => {
     if (!isEditing) {
       setEditItemName(post.item);
       setEditLocation(JSON.stringify(post.location));
     }
   }, [isEditing, post.item, post.location]);
+
+  const [nearby, setNearby] = useState(false);
+  const [locationAvailable] = useState(() => {
+    return typeof window !== 'undefined' && 'geolocation' in navigator;
+  });
+  const [locationGranted, setLocationGranted] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [userCoords, setUserCoords] = useState(null);
+
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  const sortLocations = (locs, coords) => {
+    if (!coords) return locs;
+    return [...locs].sort((a, b) => {
+      const distA = calculateDistance(coords.lat, coords.lng, a.lat, a.lng);
+      const distB = calculateDistance(coords.lat, coords.lng, b.lat, b.lng);
+      return distA - distB;
+    });
+  };
+
+  const handleNearbyToggle = (checked) => {
+    if (locationLoading) {
+      setLocationLoading(false);
+      return;
+    }
+
+    if (!checked || locationGranted) {
+      setNearby(checked);
+    } else {
+      if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+          if (result.state === 'granted') {
+            setLocationGranted(true);
+            setNearby(true);
+            fetchUserLocation();
+          } else {
+            fetchUserLocation();
+          }
+        });
+      } else {
+        fetchUserLocation();
+      }
+    }
+  };
+
+  const fetchUserLocation = () => {
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+        setUserCoords(coords);
+        setLocationGranted(true);
+        setLocationLoading(false);
+        setNearby(true);
+        
+        const sorted = sortLocations(locations, coords);
+        if (sorted.length > 0) {
+          const closest = sorted[0];
+          setEditLocation(JSON.stringify({ name: closest.name, lat: closest.lat, lng: closest.lng }));
+        }
+      },
+      (error) => {
+        console.error("Location error", error);
+        setLocationLoading(false);
+      },
+      { enableHighAccuracy: true, maximumAge: 60000 }
+    );
+  };
 
   const submitComment = (e) => {
     e.preventDefault();
@@ -102,9 +179,25 @@ export default function FoodCard({ post, onVote, onComment, onEdit, onDelete, lo
               />
             </div>
             <div className="form-group-mini">
-              <label className="text-xs font-bold text-secondary">Location</label>
+              <div className="label-with-action">
+                <label className="text-xs font-bold text-secondary">Location</label>
+                {locationAvailable && (
+                  <div className="nearby-control">
+                    {locationLoading && <div className="spinner-loader"></div>}
+                    <label className="checkbox-label">
+                      <input 
+                        type="checkbox" 
+                        checked={nearby}
+                        onChange={(e) => handleNearbyToggle(e.target.checked)}
+                        className="glass-checkbox"
+                      />
+                      <span>Nearby</span>
+                    </label>
+                  </div>
+                )}
+              </div>
               <SearchableLocationSelect 
-                locations={locations} 
+                locations={sortLocations(locations, nearby ? userCoords : null)} 
                 value={editLocation} 
                 onChange={e => setEditLocation(e.target.value)} 
                 placeholder="Search Building or Room..."
@@ -416,6 +509,44 @@ export default function FoodCard({ post, onVote, onComment, onEdit, onDelete, lo
           display: flex;
           flex-direction: column;
           gap: 4px;
+        }
+
+        .label-with-action {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .nearby-control {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .checkbox-label {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 0.75rem;
+          color: var(--text-secondary);
+          cursor: pointer;
+          user-select: none;
+        }
+        .glass-checkbox {
+          accent-color: var(--utd-orange);
+          width: 14px;
+          height: 14px;
+          cursor: pointer;
+        }
+        .spinner-loader {
+          width: 12px;
+          height: 12px;
+          border: 2px solid rgba(255,255,255,0.1);
+          border-top: 2px solid var(--utd-orange);
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
 
         .comments-section {
