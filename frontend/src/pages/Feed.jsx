@@ -98,10 +98,7 @@ export default function Feed() {
         </div>
       </div>
 
-      {/* Mobile Sticky Version - Hidden on Desktop */}
-      <Link to="/post" className="floating-action-button mobile-sticky-fab">
-        <Plus size={32} />
-      </Link>
+      {/* Mobile Sticky Version - Moved to App.jsx */}
 
       <style>{`
         .feed-container {
@@ -179,7 +176,7 @@ export default function Feed() {
           transform: scale(0.95);
         }
 
-        /* Desktop: Show inline, hide sticky */
+        /* Desktop: Show inline */
         @media (min-width: 769px) {
           .desk-inline-fab {
             position: relative;
@@ -190,28 +187,12 @@ export default function Feed() {
             font-size: 0.9rem;
             display: flex;
           }
-          .mobile-sticky-fab {
-            display: none;
-          }
         }
 
-        /* Mobile: Show sticky, hide inline */
+        /* Mobile: Hide inline */
         @media (max-width: 768px) {
           .desk-inline-fab {
             display: none;
-          }
-          .mobile-sticky-fab {
-            position: fixed;
-            width: 70px; /* Slightly larger for touch targets */
-            height: 70px;
-            padding: 0;
-            justify-content: center;
-            border-radius: 50%;
-            bottom: calc(30px + env(safe-area-inset-bottom));
-            right: 30px;
-            box-shadow: 0 10px 35px rgba(232, 117, 0, 0.7);
-            z-index: 999999; /* Ultra high z-index to stay above everything */
-            display: flex;
           }
           .feed-title-alt {
             font-size: 2rem;
