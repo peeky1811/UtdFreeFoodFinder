@@ -65,12 +65,12 @@ export default function Feed() {
           <Search className="search-icon-header" size={28} />
         </div>
         <p className="feed-subtitle-alt">Find free food at UT Dallas</p>
+        
+        <Link to="/post" className="floating-action-button desk-inline-fab">
+          <Plus size={24} />
+          <span className="fab-text">Post Food</span>
+        </Link>
       </div>
-
-      <Link to="/post" className="floating-action-button">
-        <Plus size={24} />
-        <span className="fab-text">Post Food</span>
-      </Link>
 
       {posts.length === 0 ? (
         <div className="empty-state glass-panel">
@@ -144,11 +144,17 @@ export default function Feed() {
           margin: 0 auto;
         }
         
-        /* Floating Action Button */
+        /* Floating Action Button - Desktop Inline Version */
+        .desk-inline-fab {
+          position: relative;
+          bottom: auto;
+          right: auto;
+          margin-top: 25px;
+          display: inline-flex;
+          z-index: 10;
+        }
+        
         .floating-action-button {
-          position: fixed;
-          bottom: 30px;
-          right: 30px;
           background: var(--utd-orange);
           color: white;
           padding: 16px 24px;
@@ -159,7 +165,6 @@ export default function Feed() {
           box-shadow: 0 10px 30px rgba(232, 117, 0, 0.4);
           text-decoration: none;
           font-weight: 700;
-          z-index: 1000;
           transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           border: 1px solid rgba(255,255,255,0.2);
         }
@@ -175,6 +180,7 @@ export default function Feed() {
 
         @media (max-width: 768px) {
           .floating-action-button {
+            position: fixed;
             width: 60px;
             height: 60px;
             padding: 0;
@@ -183,6 +189,7 @@ export default function Feed() {
             bottom: calc(20px + env(safe-area-inset-bottom));
             right: calc(20px + env(safe-area-inset-right));
             box-shadow: 0 8px 25px rgba(232, 117, 0, 0.5);
+            z-index: 1000;
           }
           .fab-text {
             display: none;
