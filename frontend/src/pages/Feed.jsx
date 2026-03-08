@@ -144,20 +144,7 @@ export default function Feed() {
           margin: 0 auto;
         }
         
-        /* Floating Action Button - Desktop Inline Version */
-        .desk-inline-fab {
-          position: relative;
-          bottom: auto;
-          right: auto;
-          margin: 25px auto 0 auto;
-          display: flex;
-          justify-content: center;
-          width: fit-content;
-          z-index: 10;
-          padding: 10px 20px; /* Smaller padding */
-          font-size: 0.9rem; /* Smaller font */
-        }
-        
+        /* Shared Floating Action Button Styles */
         .floating-action-button {
           background: var(--utd-orange);
           color: white;
@@ -181,6 +168,20 @@ export default function Feed() {
           transform: scale(0.95);
         }
 
+        /* Desktop specific: Inline placement */
+        @media (min-width: 769px) {
+          .desk-inline-fab {
+            position: relative;
+            margin: 25px auto 0 auto;
+            justify-content: center;
+            width: fit-content;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            z-index: 10;
+          }
+        }
+
+        /* Mobile specific: Sticky FAB */
         @media (max-width: 768px) {
           .floating-action-button {
             position: fixed;
@@ -189,10 +190,10 @@ export default function Feed() {
             padding: 0;
             justify-content: center;
             border-radius: 50%;
-            bottom: calc(20px + env(safe-area-inset-bottom));
-            right: calc(20px + env(safe-area-inset-right));
-            box-shadow: 0 8px 25px rgba(232, 117, 0, 0.5);
-            z-index: 1000;
+            bottom: calc(25px + env(safe-area-inset-bottom));
+            right: 25px;
+            box-shadow: 0 8px 32px rgba(232, 117, 0, 0.6);
+            z-index: 9999; /* Ensure it's above EVERYTHING */
           }
           .fab-text {
             display: none;
