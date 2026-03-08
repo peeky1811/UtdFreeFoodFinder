@@ -13,11 +13,11 @@
   --utd-green: #154734;
   --utd-green-glow: rgba(21, 71, 52, 0.4);
   
-  /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.05);
-  --glass-blur: blur(16px);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  /* Glassmorphism - Enhanced for Food Background */
+  --glass-bg: rgba(10, 10, 15, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(24px);
+  --glass-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.5);
 
   /* Card Gradients */
   --card-gradient: linear-gradient(135deg, rgba(20,20,30,0.8) 0%, rgba(10,10,15,0.9) 100%);
@@ -43,7 +43,11 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--bg-primary);
+  background: linear-gradient(rgba(10, 10, 14, 0.85), rgba(10, 10, 14, 0.85)), 
+              url('C:/Users/gopik/.gemini/antigravity/brain/1f4a5ced-43e3-4763-a3c1-9a99d7022842/food_background_pattern_1772976917072.png');
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
