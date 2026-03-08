@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import FoodCard from '../components/FoodCard';
 import { subscribeToFoodPosts, votePost, addComment, deleteFoodPost, editFoodPost } from '../services/db';
+import { getLocations } from '../services/nebulaApi';
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch locations to pass to cards for editing
+    getLocations().then(setLocations).catch(console.error);
+
     // Subscribe to real-time cross-tab updates from the mock DB
     const unsubscribe = subscribeToFoodPosts((data) => {
       setPosts(data);
@@ -65,12 +70,13 @@ export default function Feed() {
         <div className="grid-layout">
           {posts.map(post => (
             <FoodCard 
-              key={post.id} 
+              key={post._id} 
               post={post} 
               onVote={handleVote} 
               onComment={handleAddComment}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              locations={locations}
             />
           ))}
         </div>

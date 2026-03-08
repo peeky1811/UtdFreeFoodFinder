@@ -2,33 +2,47 @@ import { useState, useEffect } from 'react';
 import { Clock, MapPin, Info, Edit2, Trash2 } from 'lucide-react';
 import { formatDistanceToNow, isPast } from 'date-fns';
 
-export default function FoodCard({ post, onVote, onComment, onEdit, onDelete }) {
+export default function FoodCard({ post, onVote, onComment, onEdit, onDelete, locations = [] }) {
   const [timeLeft, setTimeLeft] = useState('');
   const [isExpired, setIsExpired] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [editItemName, setEditItemName] = useState(post.item);
+  const [editLocation, setEditLocation] = useState(JSON.stringify(post.location));
   const [myVote, setMyVote] = useState(null);
+
+  // Sync edit states when exiting/entering edit mode or when post data changes
+  useEffect(() => {
+    if (!isEditing) {
+      setEditItemName(post.item);
+      setEditLocation(JSON.stringify(post.location));
+    }
+  }, [isEditing, post.item, post.location]);
 
   const submitComment = (e) => {
     e.preventDefault();
     if (newComment.trim() === '') return;
-    onComment(post.id, newComment);
+    onComment(post._id, newComment);
     setNewComment('');
   };
 
   const handleVoteLocal = (val) => {
     if (myVote === val) return;
     setMyVote(val);
-    onVote(post.id, val);
+    onVote(post._id, val);
   };
 
   const submitEdit = (e) => {
     e.preventDefault();
     if (editItemName.trim()) {
-      onEdit(post.id, { item: editItemName });
-      setIsEditing(false);
+      try {
+        const newLoc = JSON.parse(editLocation);
+        onEdit(post._id, { item: editItemName, location: newLoc });
+        setIsEditing(false);
+      } catch (err) {
+        console.error("Failed to parse location edit", err);
+      }
     }
   };
 
@@ -76,63 +90,95 @@ export default function FoodCard({ post, onVote, onComment, onEdit, onDelete }) 
       <div className="card-content">
         {isEditing ? (
           <form onSubmit={submitEdit} className="edit-form-inline">
-            <input 
-              type="text" 
-              value={editItemName} 
-              onChange={e => setEditItemName(e.target.value)} 
-              className="comment-input bg-glass" 
-              autoFocus 
-            />
+            <div className="form-group-mini">
+              <label className="text-xs font-bold text-secondary">Food Item</label>
+              <input 
+                type="text" 
+                value={editItemName} 
+                onChange={e => setEditItemName(e.target.value)} 
+                className="comment-input bg-glass" 
+                autoFocus 
+              />
+            </div>
+            <div className="form-group-mini">
+              <label className="text-xs font-bold text-secondary">Location</label>
+              <select 
+                value={editLocation} 
+                onChange={e => setEditLocation(e.target.value)}
+                className="comment-input bg-glass text-sm"
+              >
+                {locations.length > 0 ? locations.map(loc => {
+                  const baseJson = JSON.stringify({ name: loc.name, lat: loc.lat, lng: loc.lng });
+                  return (
+                    <optgroup key={loc.name} label={loc.name}>
+                      <option value={baseJson}>Anywhere in {loc.name}</option>
+                      {loc.rooms && loc.rooms.map(roomNum => {
+                        const roomJson = JSON.stringify({ 
+                          name: `${loc.name} - Room ${roomNum}`, 
+                          lat: loc.lat, 
+                          lng: loc.lng 
+                        });
+                        return <option key={roomNum} value={roomJson}>Room {roomNum}</option>
+                      })}
+                    </optgroup>
+                  );
+                }) : (
+                  <option value={JSON.stringify(post.location)}>{locationName}</option>
+                )}
+              </select>
+            </div>
             <div className="edit-actions">
-              <button type="submit" className="comment-submit">Save</button>
-              <button type="button" onClick={() => { setIsEditing(false); setEditItemName(post.item); }} className="comment-submit btn-gone">Cancel</button>
+              <button type="submit" className="comment-submit">Save Changes</button>
+              <button type="button" onClick={() => { setIsEditing(false); setEditItemName(post.item); setEditLocation(JSON.stringify(post.location)); }} className="comment-submit btn-gone">Cancel</button>
             </div>
           </form>
         ) : (
-          <h3 className="card-title text-gradient">{post.item}</h3>
-        )}
-        
-        <div className="card-meta">
-          <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="meta-item hover-link bg-glass">
-            <MapPin size={16} className="text-orange" />
-            <span>{locationName}</span>
-          </a>
-          
-          <div className="meta-item">
-            <Clock size={16} className="text-green" />
-            <span className="text-secondary text-sm">
-              Posted {formatDistanceToNow(new Date(post.postedAt))} ago
-            </span>
-          </div>
-          
-          {post.timeTill && (
-            <div className={`meta-item ${isExpired ? 'text-red' : ''}`}>
-              <Info size={16} />
-              <span className="text-sm font-semibold">
-                {isExpired ? 'Ended' : `Ends ${timeLeft}`}
-              </span>
+          <>
+            <h3 className="card-title text-gradient">{post.item}</h3>
+            
+            <div className="card-meta">
+              <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="meta-item hover-link bg-glass">
+                <MapPin size={16} className="text-orange" />
+                <span>{locationName}</span>
+              </a>
+              
+              <div className="meta-item">
+                <Clock size={16} className="text-green" />
+                <span className="text-secondary text-sm">
+                  Posted {formatDistanceToNow(new Date(post.postedAt))} ago
+                </span>
+              </div>
+              
+              {post.timeTill && (
+                <div className={`meta-item ${isExpired ? 'text-red' : ''}`}>
+                  <Info size={16} />
+                  <span className="text-sm font-semibold">
+                    {isExpired ? 'Ended' : `Ends ${timeLeft}`}
+                  </span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="card-actions-row">
-          <div className="status-voting">
-            <button 
-              className={`vote-btn btn-left ${myVote === 1 ? 'active-vote' : ''}`}
-              onClick={() => handleVoteLocal(1)}
-              disabled={isExpired || post.status === 'gone'}
-            >
-              ✅ Still items left
-            </button>
-            <button 
-              className={`vote-btn btn-gone ${myVote === -1 ? 'active-vote' : ''}`}
-              onClick={() => handleVoteLocal(-1)}
-              disabled={isExpired || post.status === 'gone'}
-            >
-              ❌ Food is gone
-            </button>
-          </div>
-        </div>
+            <div className="card-actions-row">
+              <div className="status-voting">
+                <button 
+                  className={`vote-btn btn-left ${myVote === 1 ? 'active-vote' : ''}`}
+                  onClick={() => handleVoteLocal(1)}
+                  disabled={isExpired || post.status === 'gone'}
+                >
+                  ✅ Still items left
+                </button>
+                <button 
+                  className={`vote-btn btn-gone ${myVote === -1 ? 'active-vote' : ''}`}
+                  onClick={() => handleVoteLocal(-1)}
+                  disabled={isExpired || post.status === 'gone'}
+                >
+                  ❌ Food is gone
+                </button>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Comments Section */}
         <div className="comments-section">
@@ -140,7 +186,7 @@ export default function FoodCard({ post, onVote, onComment, onEdit, onDelete }) 
           <div className="comments-list">
             {post.comments && post.comments.length > 0 ? (
               post.comments.map(c => (
-                <div key={c.id} className="comment-item">
+                <div key={c._id} className="comment-item">
                   <span className="comment-time">{formatDistanceToNow(new Date(c.timestamp))} ago</span>
                   <p className="comment-text">{c.text}</p>
                 </div>
@@ -174,7 +220,7 @@ export default function FoodCard({ post, onVote, onComment, onEdit, onDelete }) 
           {isConfirmingDelete ? (
             <div className="delete-confirm">
               <span className="text-sm text-red font-semibold mr-2">Delete this post?</span>
-              <button className="manage-btn text-red" onClick={() => onDelete(post.id)}>Yes, Delete</button>
+              <button className="manage-btn text-red" onClick={() => onDelete(post._id)}>Yes, Delete</button>
               <button className="manage-btn" onClick={() => setIsConfirmingDelete(false)}>Cancel</button>
             </div>
           ) : (
@@ -382,6 +428,11 @@ export default function FoodCard({ post, onVote, onComment, onEdit, onDelete }) 
         .edit-actions {
           display: flex;
           gap: 8px;
+        }
+        .form-group-mini {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
         }
 
         .comments-section {
