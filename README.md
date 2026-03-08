@@ -1,45 +1,40 @@
 # 🍔 UTDFreeFoodFinder
 
-**UTDFreeFoodFinder** is a premium, real-time web application designed for UT Dallas students to find and share free food on campus. It combines a stunning "foodie" aesthetic with powerful proximity-based tools to ensure no free meal goes to waste.
+**UTDFreeFoodFinder** is a professional, real-time web application designed for UT Dallas students to find and share free food on campus. It features a stunning "foodie" aesthetic and powerful proximity-based tools.
 
 ![Status](https://img.shields.io/badge/Status-Version--2.0-orange?style=for-the-badge)
-![Tech](https://img.shields.io/badge/Tech-MERN%20Stack--Atlas-green?style=for-the-badge)
+![Tech](https://img.shields.io/badge/Stack-MERN%20(MongoDB,%20Express,%20React,%20Node)-green?style=for-the-badge)
 ![Aesthetic](https://img.shields.io/badge/UI-Dark%20Glassmorphism-purple?style=for-the-badge)
 
 ## ✨ Key Features
 
-- **🚀 Proximity-Based Sorting**: Intelligent "Nearby buildings" toggle sorts the campus map based on your GPS location, letting you post food in seconds.
-- **🔍 Searchable building & Room Selection**: Type building codes (e.g., "ECSN", "JSOM") or specific room numbers to find exactly where the food is.
-- **🌑 Premium Dark Aesthetic**: A high-resolution food collage background with deep glassmorphism panels for a state-of-the-art visual experience.
-- **📸 In-App Camera**: Capture photos of the food directly from your phone or laptop camera for immediate posting.
-- **✅ Community Validation**: Community-driven availability tracking. Cards are automatically marked as **GONE** and disabled after 3 negative reports.
-- **💬 Real-Time Updates**: Live commenting system for Comets to share status updates (e.g., "Only Cheese pizza left!").
-- **🗺️ Precision Navigation**: Direct Google Maps integration using precise coordinates from the Nebula API.
+- **🚀 Proximity-Based Sorting**: Automatically sorts buildings by GPS distance, putting the closest locations at the top.
+- **🔍 Searchable Location Selection**: Find any UTD building or specific room number by typing.
+- **🌑 Premium Dark Aesthetic**: Custom-built glassmorphism design with a food collage background.
+- **📸 In-App Camera**: Capture and upload food photos directly from the posting form.
+- **✅ Verification System**: Community reports automatically mark food as **GONE** after 3 negative votes.
+- **💬 Real-Time Comments**: Instant feedback and updates from fellow students.
+- **🗺️ Navigation**: Native Map integration for every food alert.
 
 ## 🛠️ Tech Stack
 
+### Database & Backend
+- **MongoDB Atlas**: Cloud-hosted primary database for all food alerts, votes, and comments.
+- **Express & Node.js**: High-performance REST API services.
+- **Mongoose**: Object Data Modeling (ODM) for structured data integrity.
+
 ### Frontend
-- **React (Vite)**: For a lightning-fast, reactive user experience.
-- **Vanilla CSS**: A custom-built, premium glassmorphic design system.
-- **Lucide React**: Sleek, modern iconography.
-- **React Webcam**: For native photo capture capabilities.
+- **React (Vite)**: Component-based UI with ultra-fast HMR.
+- **Vanilla CSS**: Bespoke design system (no generic UI libraries).
+- **Lucide React**: Modern iconography.
+- **React Webcam**: Native camera integration.
 
-### Backend & Database
-- **Node.js & Express**: A robust RESTful API architecture.
-- **MongoDB Atlas**: Cloud-hosted NoSQL database for real-time food alerts.
-- **Mongoose**: Formalized data modeling for food posts, votes, and comments.
-
-### External APIs
-- **[UTD Nebula API](https://api.utdnebula.com/)**: powers the campus-wide location, building, and room data.
+### APIs
+- **[UTD Nebula API](https://api.utdnebula.com/)**: powers building layouts, rooms, and campus coordinates.
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Node.js (v18 or higher)
-- npm
-- MongoDB Atlas Account (for custom deployment)
-
-### Installation & Local Development
+### Installation
 
 1. **Clone the repository:**
    ```bash
@@ -51,7 +46,7 @@
    ```bash
    cd backend
    npm install
-   # Create a .env file with your MONGODB_URI
+   # Add your MONGODB_URI to a .env file
    npm start
    ```
 
@@ -62,16 +57,4 @@
    npm run dev
    ```
 
-4. **Access the App:**
-   Open your browser to `http://localhost:5173`.
-
-## 📜 Roadmap
-- [x] Searchable building/room selection.
-- [x] GPS-based proximity sorting.
-- [x] Transition to MongoDB Atlas.
-- [x] Premium dark aesthetic overhaul.
-- [ ] User authentication for authenticated posting.
-- [ ] Push notifications for new food alerts near you.
-
----
-*Powered by Comets, for Comets. Developed for the UTD Community.*
+*Originally developed for the UTD Community.*
