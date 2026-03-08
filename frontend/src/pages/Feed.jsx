@@ -56,42 +56,52 @@ export default function Feed() {
   }
 
   return (
-    <div className="feed-container animate-fade-in">
-      <div className="nebula-branding">powered by nebula api</div>
-      
-      <div className="feed-header-alt">
-        <div className="title-row">
-          <h1 className="feed-title-alt">UTD Food Finder</h1>
-          <Search className="search-icon-header" size={28} />
+    <>
+      <div className="feed-container">
+        <div className="animate-fade-in">
+          <div className="nebula-branding">powered by nebula api</div>
+          
+          <div className="feed-header-alt">
+            <div className="title-row">
+              <h1 className="feed-title-alt">UTD Food Finder</h1>
+              <Search className="search-icon-header" size={28} />
+            </div>
+            <p className="feed-subtitle-alt">Find free food at UT Dallas</p>
+            
+            {/* Desktop Inline Version - Hidden on Mobile */}
+            <Link to="/post" className="floating-action-button desk-inline-fab">
+              <Plus size={24} />
+              <span className="fab-text">Post Food</span>
+            </Link>
+          </div>
+
+          {posts.length === 0 ? (
+            <div className="empty-state glass-panel">
+              <h3>No food right now!</h3>
+              <p>Be the hero UTD needs and post some leftover food.</p>
+            </div>
+          ) : (
+            <div className="grid-layout">
+              {posts.map(post => (
+                <FoodCard 
+                  key={post._id} 
+                  post={post} 
+                  onVote={handleVote} 
+                  onComment={handleAddComment}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  locations={locations}
+                />
+              ))}
+            </div>
+          )}
         </div>
-        <p className="feed-subtitle-alt">Find free food at UT Dallas</p>
-        
-        <Link to="/post" className="floating-action-button desk-inline-fab">
-          <Plus size={24} />
-          <span className="fab-text">Post Food</span>
-        </Link>
       </div>
 
-      {posts.length === 0 ? (
-        <div className="empty-state glass-panel">
-          <h3>No food right now!</h3>
-          <p>Be the hero UTD needs and post some leftover food.</p>
-        </div>
-      ) : (
-        <div className="grid-layout">
-          {posts.map(post => (
-            <FoodCard 
-              key={post._id} 
-              post={post} 
-              onVote={handleVote} 
-              onComment={handleAddComment}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              locations={locations}
-            />
-          ))}
-        </div>
-      )}
+      {/* Mobile Sticky Version - Hidden on Desktop */}
+      <Link to="/post" className="floating-action-button mobile-sticky-fab">
+        <Plus size={32} />
+      </Link>
 
       <style>{`
         .feed-container {
@@ -157,6 +167,7 @@ export default function Feed() {
           font-weight: 700;
           transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           border: 1px solid rgba(255,255,255,0.2);
+          z-index: 100;
         }
         
         .floating-action-button:hover {
@@ -168,7 +179,7 @@ export default function Feed() {
           transform: scale(0.95);
         }
 
-        /* Desktop specific: Inline placement */
+        /* Desktop: Show inline, hide sticky */
         @media (min-width: 769px) {
           .desk-inline-fab {
             position: relative;
@@ -177,32 +188,36 @@ export default function Feed() {
             width: fit-content;
             padding: 10px 20px;
             font-size: 0.9rem;
-            z-index: 10;
+            display: flex;
+          }
+          .mobile-sticky-fab {
+            display: none;
           }
         }
 
-        /* Mobile specific: Sticky FAB */
+        /* Mobile: Show sticky, hide inline */
         @media (max-width: 768px) {
-          .floating-action-button {
+          .desk-inline-fab {
+            display: none;
+          }
+          .mobile-sticky-fab {
             position: fixed;
-            width: 60px;
-            height: 60px;
+            width: 70px; /* Slightly larger for touch targets */
+            height: 70px;
             padding: 0;
             justify-content: center;
             border-radius: 50%;
-            bottom: calc(25px + env(safe-area-inset-bottom));
-            right: 25px;
-            box-shadow: 0 8px 32px rgba(232, 117, 0, 0.6);
-            z-index: 9999; /* Ensure it's above EVERYTHING */
-          }
-          .fab-text {
-            display: none;
+            bottom: calc(30px + env(safe-area-inset-bottom));
+            right: 30px;
+            box-shadow: 0 10px 35px rgba(232, 117, 0, 0.7);
+            z-index: 999999; /* Ultra high z-index to stay above everything */
+            display: flex;
           }
           .feed-title-alt {
             font-size: 2rem;
           }
         }
       `}</style>
-    </div>
+    </>
   );
 }
