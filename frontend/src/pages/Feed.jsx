@@ -149,19 +149,22 @@ export default function Feed() {
           position: relative;
           bottom: auto;
           right: auto;
-          margin-top: 25px;
-          display: inline-flex;
+          margin: 25px auto 0 auto;
+          display: flex;
+          justify-content: center;
+          width: fit-content;
           z-index: 10;
+          padding: 10px 20px; /* Smaller padding */
+          font-size: 0.9rem; /* Smaller font */
         }
         
         .floating-action-button {
           background: var(--utd-orange);
           color: white;
-          padding: 16px 24px;
           border-radius: 50px;
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 8px;
           box-shadow: 0 10px 30px rgba(232, 117, 0, 0.4);
           text-decoration: none;
           font-weight: 700;
